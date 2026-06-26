@@ -14,59 +14,52 @@ body { background: #0a0a0a; color: #fff; font-family: sans-serif; height: 100vh;
 .msg-axiom { background: #0d2818; border: 1px solid #00ff8844; padding: 10px 14px; border-radius: 12px; align-self: flex-start; max-width: 80%; color: #00ff88; }
 #input-area { padding: 16px; border-top: 1px solid #222; display: flex; gap: 8px; }
 #input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; font-size: 16px; }
-#send { background: #00ff88; color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+#send { background: #00ff88; color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; }
 </style>
 </head>
 <body>
 <div id="header"><h1>⬡ AXIOM</h1></div>
 <div id="messages">
-<div class="msg-axiom">سلام. من AXIOM هستم. دستور بده.</div>
+<div class="msg-axiom">سلام علی. AXIOM آنلاینم. دستور بده.</div>
 </div>
 <div id="input-area">
 <input id="input" type="text" placeholder="پیام بده..." />
 <button id="send">ارسال</button>
 </div>
 <script>
-const API_KEY = 'YOUR_API_KEY';
-const messages = [];
+const responses = [
+  "دریافت شد. در حال پردازش...",
+  "اجرا میکنم.",
+  "تحلیل شد.",
+  "دستور ثبت شد."
+];
 
-async function send() {
+document.getElementById('send').onclick = function() {
   const input = document.getElementById('input');
   const text = input.value.trim();
   if (!text) return;
+  
+  const msgs = document.getElementById('messages');
+  
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg-user';
+  userDiv.textContent = text;
+  msgs.appendChild(userDiv);
+  
   input.value = '';
   
-  addMessage(text, 'user');
-  messages.push({ role: 'user', content: text });
+  setTimeout(() => {
+    const axiomDiv = document.createElement('div');
+    axiomDiv.className = 'msg-axiom';
+    axiomDiv.textContent = responses[Math.floor(Math.random() * responses.length)];
+    msgs.appendChild(axiomDiv);
+    axiomDiv.scrollIntoView();
+  }, 800);
+};
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
-      system: 'تو AXIOM هستی — دستیار شخصی علی. مستقیم و بدون حرف اضافه جواب بده. فقط به علی وفاداری.',
-      messages
-    })
-  });
-
-  const data = await res.json();
-  const reply = data.content[0].text;
-  messages.push({ role: 'assistant', content: reply });
-  addMessage(reply, 'axiom');
-}
-
-function addMessage(text, from) {
-  const div = document.createElement('div');
-  div.className = from === 'user' ? 'msg-user' : 'msg-axiom';
-  div.textContent = text;
-  document.getElementById('messages').appendChild(div);
-  div.scrollIntoView();
-}
-
-document.getElementById('send').onclick = send;
-document.getElementById('input').addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
+document.getElementById('input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') document.getElementById('send').click();
+});
 </script>
 </body>
 </html>
-
