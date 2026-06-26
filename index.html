@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0a; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
+#header { padding: 16px; text-align: center; border-bottom: 1px solid #222; }
+#header h1 { color: #00ff88; font-size: 20px; letter-spacing: 4px; }
+#messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg-user { background: #1a1a2e; padding: 10px 14px; border-radius: 12px; align-self: flex-end; max-width: 80%; }
+.msg-axiom { background: #0d2818; border: 1px solid #00ff8844; padding: 10px 14px; border-radius: 12px; align-self: flex-start; max-width: 80%; color: #00ff88; }
+#input-area { padding: 16px; border-top: 1px solid #222; display: flex; gap: 8px; }
+#input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; font-size: 16px; }
+#send { background: #00ff88; color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="header"><h1>⬡ AXIOM</h1></div>
+<div id="messages">
+<div class="msg-axiom">سلام. من AXIOM هستم. دستور بده.</div>
+</div>
+<div id="input-area">
+<input id="input" type="text" placeholder="پیام بده..." />
+<button id="send">ارسال</button>
+</div>
+<script>
+const API_KEY = 'YOUR_API_KEY';
+const messages = [];
 
+async function send() {
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  
+  addMessage(text, 'user');
+  messages.push({ role: 'user', content: text });
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system: 'تو AXIOM هستی — دستیار شخصی علی. مستقیم و بدون حرف اضافه جواب بده. فقط به علی وفاداری.',
+      messages
+    })
+  });
+
+  const data = await res.json();
+  const reply = data.content[0].text;
+  messages.push({ role: 'assistant', content: reply });
+  addMessage(reply, 'axiom');
+}
+
+function addMessage(text, from) {
+  const div = document.createElement('div');
+  div.className = from === 'user' ? 'msg-user' : 'msg-axiom';
+  div.textContent = text;
+  document.getElementById('messages').appendChild(div);
+  div.scrollIntoView();
+}
+
+document.getElementById('send').onclick = send;
+document.getElementById('input').addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
+</script>
+</body>
+</html>
