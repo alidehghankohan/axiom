@@ -84,10 +84,10 @@ async function sendMessage() {
     });
     const data = await response.json();
     document.getElementById('loading').remove();
-    chatBox.innerHTML += `<div class="msg bot">AXIOM: ${data.reply}</div>`;
+    chatBox.innerHTML += `<div class="msg bot">AXIOM: ${data.reply || data.error || JSON.stringify(data)}</div>`;
   } catch (err) {
     document.getElementById('loading').remove();
-    chatBox.innerHTML += `<div class="msg bot">AXIOM: یه مشکلی پیش اومد، دوباره امتحان کن ⚠️</div>`;
+    chatBox.innerHTML += `<div class="msg bot">AXIOM: خطای شبکه: ${err.message}</div>`;
   }
   chatBox.scrollTop = chatBox.scrollHeight;
 }
