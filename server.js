@@ -10,18 +10,23 @@ const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY,
 });
 
-// چک سلامت سرور
 app.get('/', (req, res) => {
   res.send('AXIOM سرور فعاله ✅');
 });
 
-// آدرسی که index.html بهش پیام میفرسته
 app.post('/api/chat', async (req, res) => {
+  console.log('یه درخواست جدید رسید:', req.body);
+
   try {
     const userMessage = req.body.message;
 
     if (!userMessage) {
       return res.status(400).json({ error: 'پیام خالیه' });
+    }
+
+    if (!process.env.CLAUDE_API_KEY) {
+      console.log('خطا: کلید API تنظیم نشده!');
+      return res.status(500).json({ error: 'کلید API تنظیم نشده' });
     }
 
     const response = await anthropic.messages.create({
@@ -32,11 +37,12 @@ app.post('/api/chat', async (req, res) => {
     });
 
     const reply = response.content[0].text;
+    console.log('جواب کلود آماده شد ✅');
     res.json({ reply });
 
   } catch (error) {
-    console.error('خطا:', error);
-    res.status(500).json({ error: 'یه مشکلی پیش اومد، دوباره امتحان کن' });
+    console.log('خطای کامل:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
